@@ -1,18 +1,30 @@
-import { useState, useRef } from "react";
-import { Button, Input } from "antd";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Button, Input, Spin } from "antd";
 import { openai } from "../config/openai-config";
 import globalStyles from "../styles/global";
 
 const Home = () => {
   const [content, setContent] = useState();
   const [chatList, setChatList] = useState([]);
+  const [loading, setLoading] = useState(false);
   const requestingRef = useRef(false);
+  const listRef = useRef();
+
+  const scrollToBottom = useCallback(() => {
+    listRef.current.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatList]);
 
   const handleClick = async () => {
     if (content || requestingRef.current) {
       try {
         setChatList((chatList) => chatList.concat(content));
         setContent(null);
+        setLoading(true);
         requestingRef.current = true;
         const response = await openai.createChatCompletion({
           model: "gpt-3.5-turbo",
@@ -25,6 +37,7 @@ const Home = () => {
           temperature: 0,
         });
         requestingRef.current = false;
+        setLoading(false);
         setChatList((chatList) =>
           chatList.concat(response.data.choices[0].message.content)
         );
@@ -36,7 +49,7 @@ const Home = () => {
 
   return (
     <div>
-      <div style={{ margin: "16px" }}>
+      <div style={{ margin: "16px", paddingBottom: "48px" }}>
         {chatList?.map((chat, index) => {
           return (
             <div
@@ -45,18 +58,21 @@ const Home = () => {
                 background: index % 2 === 0 ? "while" : "#ccc",
                 padding: "8px",
                 border: "1px solid #ccc",
+                whiteSpace: "pre-wrap",
               }}
             >
               {chat}
             </div>
           );
         })}
+        <div ref={listRef} />
       </div>
       <div
         style={{
           position: "fixed",
           bottom: 0,
           width: "100%",
+          height: "32px",
           marginBottom: "16px",
           flexDirection: "row",
           display: "flex",
@@ -77,6 +93,22 @@ const Home = () => {
           send
         </Button>
       </div>
+      {loading && (
+        <div
+          style={{
+            position: "fixed",
+            display: "flex",
+            left: 0,
+            top: 0,
+            right: 0,
+            bottom: 0,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
+        </div>
+      )}
       <style jsx global>
         {globalStyles}
       </style>
