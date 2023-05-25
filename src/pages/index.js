@@ -22,24 +22,28 @@ const Home = () => {
   const handleClick = async () => {
     if (content || requestingRef.current) {
       try {
-        setChatList((chatList) => chatList.concat(content));
+        setChatList((chatList) => chatList.concat({ role: "user", content }));
         setContent(null);
         setLoading(true);
         requestingRef.current = true;
         const response = await openai.createChatCompletion({
           model: "gpt-3.5-turbo",
           messages: [
+            ...chatList,
             {
               role: "user",
               content,
             },
           ],
-          temperature: 0,
+          temperature: 0.8,
         });
         requestingRef.current = false;
         setLoading(false);
         setChatList((chatList) =>
-          chatList.concat(response.data.choices[0].message.content)
+          chatList.concat({
+            role: "system",
+            content: response.data.choices[0].message.content,
+          })
         );
       } catch (error) {
         console.log(error);
@@ -61,7 +65,7 @@ const Home = () => {
                 whiteSpace: "pre-wrap",
               }}
             >
-              {chat}
+              {chat.content}
             </div>
           );
         })}
