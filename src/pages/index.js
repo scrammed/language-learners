@@ -10,6 +10,7 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const requestingRef = useRef(false);
   const listRef = useRef();
+  const inputMethodRef = useRef(false);
 
   const scrollToBottom = useCallback(() => {
     listRef.current.scrollIntoView({ behavior: "smooth" });
@@ -19,7 +20,7 @@ const Home = () => {
     scrollToBottom();
   }, [chatList]);
 
-  const handleClick = async () => {
+  const requestChatCompletion = async () => {
     if (content || requestingRef.current) {
       try {
         setChatList((chatList) => chatList.concat({ role: "user", content }));
@@ -88,11 +89,25 @@ const Home = () => {
           onChange={(event) => {
             setContent(event.target.value);
           }}
+          onCompositionStart={() => {
+            inputMethodRef.current = true;
+          }}
+          onCompositionEnd={() => {
+            inputMethodRef.current = false;
+          }}
+          onKeyDown={(event) => {
+            if (inputMethodRef.current) {
+              return;
+            }
+            if (event.key === "Enter") {
+              requestChatCompletion();
+            }
+          }}
           value={content}
         />
         <Button
           style={{ marginLeft: "8px", marginRight: "16px" }}
-          onClick={handleClick}
+          onClick={requestChatCompletion}
         >
           send
         </Button>
