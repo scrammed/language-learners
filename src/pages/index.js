@@ -72,15 +72,18 @@ const Home = () => {
         })}
         <div ref={listRef} />
       </div>
+
       <div
         style={{
           position: "fixed",
           bottom: 0,
           width: "100%",
           height: "32px",
-          marginBottom: "16px",
           flexDirection: "row",
           display: "flex",
+          backgroundColor: "white",
+          paddingTop: "16px",
+          paddingBottom: "16px",
         }}
       >
         <Input
