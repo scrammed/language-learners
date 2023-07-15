@@ -39,7 +39,6 @@ const Home = () => {
           temperature: 0.8,
         });
         requestingRef.current = false;
-        setLoading(false);
         setChatList((chatList) =>
           chatList.concat({
             role: "system",
@@ -48,6 +47,8 @@ const Home = () => {
         );
       } catch (error) {
         console.log(error);
+      } finally {
+        setLoading(false);
       }
     }
   };
